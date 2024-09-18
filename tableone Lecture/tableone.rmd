@@ -1,0 +1,358 @@
+---
+title: 'Analyze Your Data with R in Simple Steps'
+author:
+  Shehab A. Habila (Biostatistician, R programmer), Hossam M. Ghorab (Biostatistician, R programmer)
+output:
+  html_notebook:
+    toc: true
+  pdf_document:
+    toc: true
+  html_document:
+    toc: true
+    df_print: paged
+  word_document:
+    toc: true
+---
+
+\newpage
+
+# 1 Introduction
+## 1.1 What is _`tableone`_ package in _R_?
+* `tableone` is an _R_ package that helps you create "Table 1" _(making summary statistics)_, as well as performing the basic needed statistical tests.
+    
+    
+## 1.2 Features of _`tableone`_ Package:
+*	Handles both continuous and categorical variables.
+* Categorical variables are summarized as counts (how many) and/or percentages.
+* Continuous variables can be summarized in two ways:
+  + Normal way: Shows the mean (average) and standard deviation (how much values vary).
+  + Non-normal way: Shows the median (middle value) and interquartile range (range of the middle 50% of values, excluding first and last quartiles).
+
+\newpage
+  
+# 2 Getting into it
+## 2.1 What Will You Need?
+* To effectively utilize the _`tableone`_ package in _R_ for data analysis, the following tools and software are recommended:
+  + **RStudio**: An integrated development environment (IDE) for _R_ that facilitates code writing, package usage, and data visualization.
+  + **_`tableone`_ Package** itself.
+  + **Spreadsheet Software**: Such as **Microsoft Excel** or any equivalent alternative, to export, review, and refine the generated tables.
+  + **Word Processing Software**: Such as **Microsoft Word** or any similar application, to compile and finalize the analysis report, including formatted tables and interpretations.
+
+
+## 2.2 How to Setup the Environment?
+* Follow these steps to set up your environment:
+  + **Install RStudio**: If you haven't already, [download and install RStudio](https://posit.co/download/rstudio-desktop/).
+  + **Install Required Packages**: Once RStudio is installed and running, you'll need to install the necessary packages:
+    - The _`tableone`_ package is essential for creating summary tables and finding p-values.
+    - It is recommended to also install the _`tidyverse`_ library.
+
+```{r eval=FALSE}
+# install.packages("tableone") # Installing the `tableone` package
+# install.packages("tidyverse") # Installing the `tidyverse` library
+
+# Activating the packages
+library(tableone)
+library(tidyverse)
+```
+
+## 2.3 What about the Workflow?
+1. **Import Your Data**: Usually from Excel file.
+2. **Create Summary Tables**: Utilize the _`tableone`_ package to perform descriptive and inferential statistics.
+3. **Export Tables**: Once your tables are ready, export each one to an Excel file.
+4. **Integrate with Your Document**: Finally, copy the tables from Excel and paste them into your Word document.
+\
+\
+_Detailed instructions for each step will be provided in the next sections._
+
+
+\newpage
+
+
+# 3 Usage
+## 3.1 Importing the Raw Data from Excel File
+* You can import the data file using RStudio interface:
+  + Import Dataset _in the upper right corner_ => From Excel
+* You can import it using r code:
+```{r import}
+# my_data <- readxl::read_excel("my_data.xlsx")
+my_data <- readxl::read_excel("received/SH/my_data.xlsx")
+# Storing the data in a variable called "my_data"
+
+
+
+# NOTE: Some concepts you need to know
+#
+#   1. A variable: you can think of a variable as the pocket that will contain data
+# during any process.
+#
+#   2. A function: you can think of a function as the machine that will take your data
+# and operate on it, giving you an output based on the given data. The syntax of a
+# function is: my_function(parameter, another_parameter, ..., another_parameters)
+#
+#   3. A parameter: It is a piece of information you pass to a function, it can be the
+# data that the function will operate on, or it can be some instruction.
+```
+Here is a preview of the data we will work on during this tutorial:
+```{r echo=FALSE}
+my_data
+```
+
+
+## 3.2 Something to Put in Mind: _categorical variable conversion_
+* Usually, categorical variables are coded numerically _(when working with R, it is better to leave it uncoded)_.
+* Our package can't recognize this, So you have to include a list _(vector)_ with all the categorical variables of your data in a parameter _(instruction)_ while using the package.
+_Will be clarified in the next section_
+
+\newpage
+
+## 3.3 Making Summary Statistics _(Descriptive Statistics)_
+* Use the function **_'CreateTableOne()'_**
+
+### 3.3.1 Simplest Use Case: treating the whole data as one group
+* In this example, all columns of your data will be included.
+```{r simple}
+tableone::CreateTableOne(data = my_data)
+# Here, we are using the function `CreateTableOne()` with the parameter "data" to 
+# give it our data, which is stored in the variable "my_data"
+```
+
+### | 3.3.1.1 Choosing Only Some Variables to Be Included
+* Here, we will add the parameter "vars":
+```{r choose_vars}
+## Vector of variables to summarize
+included_vars <- c("Group", "Weight", "Height", "Hb") # Excluded the ID variable
+
+## Create a TableOne
+my_summary_table <- tableone::CreateTableOne(data = my_data, vars = included_vars)
+# "vars" parameter determines the variables included in the summary.
+
+print(my_summary_table) # The function "print" shows the table
+```
+
+\newpage
+
+### | 3.3.1.2 Categorical Variable Conversion: Define categorical variables
+* Here, we will add the parameter "factorVars" to determine which variables are categorical:
+```{r define_cats}
+## Vector of variables to summarize
+included_vars <- c("Group", "Weight", "Height", "Hb") # Excluded the ID variable
+
+## Vector of categorical variables that need transformation
+categorical_vars <- c("Group")
+
+## Create a TableOne
+my_summary_table <- tableone::CreateTableOne(
+  data = my_data,
+  vars = included_vars,
+  factorVars = categorical_vars
+  )
+# "factorVars" parameter determines the variables that should be treated as categorical.
+
+print(my_summary_table) # The function "print" shows the table
+```
+
+\newpage
+
+### 3.3.2 Showing all levels for categorical variables
+* If you want to show all levels, you can use "showAllLevels" argument to the print() method in order to show all categories of the included categorical variables:
+```{r show_all}
+## Vector of variables to summarize
+included_vars <- c("Group", "Weight", "Height", "Hb") # Excluded the ID variable
+
+## Vector of categorical variables that need transformation
+categorical_vars <- c("Group")
+
+## Create a TableOne
+my_summary_table <- tableone::CreateTableOne(
+  data = my_data,
+  vars = included_vars,
+  factorVars = categorical_vars
+  )
+
+# Now we are using some new parameters for the print function
+print(my_summary_table, showAllLevels = TRUE, formatOptions = list(big.mark = ","))
+```
+
+\newpage
+
+### 3.3.3 Grouping the Data: dividing the data into groups according to given categorical variable
+* Here, we will add the parameter "strata" and assign to it the categorical variable (grouping factor) by which the data will be grouped.
+* You can also see that the package had perfomed the proper statistical test to find p-value of difference between groups of the given grouping factor.
+```{r stratify}
+## Vector of variables to summarize
+included_vars <- c("Weight", "Height", "Hb") # Excluded the ID variable
+
+## Vector of categorical variables that need transformation
+categorical_vars <- c("Group")
+
+## Create a TableOne
+my_summary_table <- tableone::CreateTableOne(
+  data = my_data,
+  vars = included_vars,
+  factorVars = categorical_vars,
+  strata = "Group"
+  )
+
+# Now we are using some new parameters for the print function
+print(my_summary_table, showAllLevels = TRUE, formatOptions = list(big.mark = ","))
+```
+
+\newpage
+
+### 3.3.4 Summarizing Nonnormal Variables
+* Do it with the nonnormal argument to the print() method:
+```{r nonnormal}
+## Vector of variables to summarize
+included_vars <- c("Weight", "Height", "Hb") # Excluded the ID variable
+
+## Vector of categorical variables that need transformation
+categorical_vars <- c("Group")
+
+# Lets assume that the height is not normally distributed
+nonnormal_vars <- c("Height")
+
+## Create a TableOne
+my_summary_table <- tableone::CreateTableOne(
+  data = my_data,
+  vars = included_vars,
+  factorVars = categorical_vars,
+  strata = "Group"
+  )
+
+# Now we are using some new parameters for the print function
+print(
+  my_summary_table,
+  nonnormal = nonnormal_vars,
+  showAllLevels = TRUE,
+  formatOptions = list(big.mark = ","))
+```
+
+\newpage
+
+### 3.3.5 Detailed information including missingness
+* If you need more detailed information including the number/proportion missing. Use the summary() method on the result object.
+* It also shows the p-values in both cases of normality.
+* The continuous variables are shown first, and the categorical variables are shown second.
+* Unfortunately, our data doesn't contain categorical variables other than the grouping one, but if you try it with another data, it will work.
+
+```{r detailed}
+summary(my_summary_table)
+```
+
+\newpage
+
+
+### 3.3.6 Categorical or Continuous Variables Only
+* To get the categorical part only of the previous methods, you can use the following code before using "print":
+```{r cat_only}
+# We don't have categorical varaibles, but let's try the syntax!
+my_summary_table <- my_summary_table$CatTable
+```
+* To get the continuous part only of the previous methods, you can use the following code before using "print":
+```{r cont_only}
+my_summary_table <- my_summary_table$ContTable
+```
+
+\newpage
+
+## 3.4 Testing for Difference _(Finding the p-Value)_
+* As you can see in the previous table, when there are two or more groups group comparison p-values are printed along with the table.
+* The hypothesis test functions used by default are:
+  + chisq.test() for categorical variables.
+  + oneway.test() for continous variables (with equal variance assumption, i.e., regular ANOVA).
+* You may be worried about the nonnormal variables and small cell counts in the stage variable.
+* In such a situation, you can use the nonnormal argument like before as well as the exact (test) argument in the print() method.
+  + Now kruskal.test() is used for the nonnormal continuous variables and fisher.test() is used for categorical variables specified in the exact argument.
+```{r diff}
+## Vector of variables to summarize
+included_vars <- c("Weight", "Height", "Hb") # Excluded the ID variable
+
+## Vector of categorical variables that need transformation
+categorical_vars <- c("Group")
+
+# Lets assume that the height is not normally distributed
+nonnormal_vars <- c("Height")
+
+## Create a TableOne
+my_summary_table <- tableone::CreateTableOne(
+  data = my_data,
+  vars = included_vars,
+  factorVars = categorical_vars,
+  strata = "Group"
+  )
+
+# You test for the Standardize mean differences using the "smd" parameter
+print(my_summary_table, nonnormal = nonnormal_vars, smd = TRUE)
+```
+
+\newpage
+
+## 3.5 Exporting
+* The following code exports the final table, which you made using the previous methods, into CSV file _(A type of data files, it is also supported by Microsoft Excel)_:
+```{r eval=FALSE}
+# write.csv(tab, file = "myTable.csv")
+write.csv(print(my_summary_table, nonnormal = nonnormal_vars, smd = TRUE), file = "myTable.csv")
+# Save to a CSV file
+```
+
+
+
+
+
+\newpage
+# 4 Summary
+
+In this tutorial, we explored the process of generating and customizing summary statistics tables using the _`tableone`_ package, with particular attention to the "`CreateTableOne()`" function. Below is a brief summary of the key aspects and modifications discussed:
+
+* **Variable Selection and Stratification**:
+  + You can specify variables to include using the "`vars`" argument.
+  + You can stratify the table by categorical variables with the "`strata`" argument.
+* **Showing All Levels for Categorical Variables**:
+  + By adding 'showAllLevels = TRUE' to the print method.
+* **Handling Non-Normal Distributions**:
+  + The "`nonnormal`" argument allows the presentation of median and interquartile ranges (IQR) for non-normally distributed continuous variables.
+* **Defining Factor Variables**:
+    * The "`factorVars`" argument ensures proper handling of categorical data.
+* **P-Value Calculation and Customization**:
+    * p-values are automatically calculated using the proper tests when stratifying the data.
+\
+
+This summary encapsulates the key modifications and parameters available in the "`CreateTableOne()`" function, offering a concise reference for efficiently generating and tailoring summary tables in your research work.
+
+\newpage
+
+# 5 Example: Place your parameters and run this code
+```{r eval=FALSE}
+# Ultimate Guide: analyze your data in simple steps
+# ========================================================
+
+# Importing the file
+my_data <- readxl::read_excel("my file destination/my file.xlsx")
+
+# Determining the included variables
+included_vars <- c("included variable name 1", "included variable name n")
+# Determining the nonnormal variables
+nonnormal_vars <- c("nonnormal variable name 1", "nonnormal variable name n")
+# Determining the categorical variables
+categorical_vars <- c("categorical variable name 1", "categorical variable name n")
+# Determining the grouping variable
+grouping_variable <- "grouping variable name"
+
+# Making the analysis
+analysis_table <- CreateTableOne(
+  data = my_data,
+  vars = included_vars,
+  factorVars = categorical_vars,
+  strata = grouping_variable
+)
+final_table <- print(analysis_table,
+      showAllLevels = TRUE,
+      nonnormal = nonnormal_vars,
+      formatOptions = list(big.mark = ","))
+
+# Exporting the final_table to a CSV file
+write.csv(final_table, file = "Data Analysis Results.csv")
+
+# ========================================================
+# Congrats! You've finished the analysis.
+```
